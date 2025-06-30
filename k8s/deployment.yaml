@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abctech-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: abctech
+  template:
+    metadata:
+      labels:
+        app: abctech
+    spec:
+      containers:
+      - name: abctech-container
+        image: yogamaya21/abctech-app:latest
+        ports:
+        - containerPort: 8080
