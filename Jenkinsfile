@@ -4,6 +4,7 @@ pipeline {
 		{
         	IMAGE_NAME = 'abctech-app'
         	DOCKERHUB_IMAGE = " yogamaya21/abctech-app:latest"
+		DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-creds' // Jenkins credential ID
     		}
 
     	stages {
@@ -35,23 +36,22 @@ pipeline {
     	environment 
 		{
         		DOCKER_HUB_REPO = 'yogamaya21/abctech-app'
-        		DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-creds' // Jenkins credential ID
+        		
     		}
     		steps {
-        		script {
             		// Log in to Docker Hub
-            		withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}", 
-                                               usernameVariable: 'DOCKER_USER', 
-                                               passwordVariable: 'DOCKER_PASS')]) 
-			
-                	sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-            		}
+            		script {
+    				withCredentials([usernamePassword(
+        			credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}",
+        			usernameVariable: 'DOCKER_USER',
+        			passwordVariable: 'DOCKER_PASS')]) {
 
-            		// Tag the Docker image for Docker Hub
-            		sh "docker tag ${IMAGE_NAME} ${DOCKER_HUB_REPO}"
+        			sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+        			sh "docker tag ${IMAGE_NAME} ${DOCKER_HUB_REPO}"
+        			sh "docker push ${DOCKER_HUB_REPO}"
+   			 }
+			}
 
-            		// Push the image
-            		sh "docker push ${DOCKER_HUB_REPO}"
         	     }
     	}
 
