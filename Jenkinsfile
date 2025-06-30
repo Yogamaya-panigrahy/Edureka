@@ -72,7 +72,24 @@ pipeline {
         }
     }
 }
+stage('Deploy to Kubernetes') {
+    environment {
+        KUBE_CONFIG_CREDENTIALS_ID = 'kubeconfig-cred-id' // Replace with your actual Jenkins credential ID
+        K8S_NAMESPACE = 'default' // Or your desired namespace
+    }
+    steps {
+        withCredentials([file(credentialsId: "${KUBE_CONFIG_CREDENTIALS_ID}", variable: 'KUBECONFIG')]) {
+            script {
+                // Apply Kubernetes manifest
 
+                sh """
+                    kubectl --kubeconfig=$KUBECONFIG delete deployment abctech-deployment --namespace=${K8S_NAMESPACE} --ignore-not-found
+                    kubectl --kubeconfig=$KUBECONFIG apply -f k8s/deployment.yaml --namespace=${K8S_NAMESPACE}
+                """
+            }
+        }
+    }
+}
 }
 }
 
